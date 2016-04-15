@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <array>
-#include "msclr\marshal_cppstd.h"
+#include <map>
 
 namespace CppWinForm1 {
 
@@ -24,6 +24,8 @@ namespace CppWinForm1 {
 		MyForm(void)
 		{
 			InitializeComponent();
+			
+			addCategories();
 			//
 			//TODO: Add the constructor code here
 			//
@@ -63,7 +65,8 @@ namespace CppWinForm1 {
 	private: System::Windows::Forms::Button^  btn_clearFields;
 	private: System::Windows::Forms::ComboBox^  cmb_category;
 	private: System::Windows::Forms::Label^  label5;
-	private: System::Windows::Forms::Button^  btn_test;
+
+	private: ArrayList^ categories = gcnew ArrayList;
 
 
 
@@ -101,7 +104,6 @@ namespace CppWinForm1 {
 			this->btn_clearFields = (gcnew System::Windows::Forms::Button());
 			this->cmb_category = (gcnew System::Windows::Forms::ComboBox());
 			this->label5 = (gcnew System::Windows::Forms::Label());
-			this->btn_test = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// btn_ok
@@ -244,6 +246,7 @@ namespace CppWinForm1 {
 			// 
 			// cmb_category
 			// 
+			this->cmb_category->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->cmb_category->FormattingEnabled = true;
 			this->cmb_category->Items->AddRange(gcnew cli::array< System::Object^  >(4) { L"Test1", L"Test2", L"Test3", L"Test4" });
 			this->cmb_category->Location = System::Drawing::Point(93, 304);
@@ -260,22 +263,11 @@ namespace CppWinForm1 {
 			this->label5->TabIndex = 17;
 			this->label5->Text = L"Category";
 			// 
-			// btn_test
-			// 
-			this->btn_test->Location = System::Drawing::Point(327, 432);
-			this->btn_test->Name = L"btn_test";
-			this->btn_test->Size = System::Drawing::Size(75, 23);
-			this->btn_test->TabIndex = 18;
-			this->btn_test->Text = L"Test Combo";
-			this->btn_test->UseVisualStyleBackColor = true;
-			this->btn_test->Click += gcnew System::EventHandler(this, &MyForm::btn_test_Click);
-			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(603, 593);
-			this->Controls->Add(this->btn_test);
 			this->Controls->Add(this->label5);
 			this->Controls->Add(this->cmb_category);
 			this->Controls->Add(this->btn_clearFields);
@@ -299,9 +291,10 @@ namespace CppWinForm1 {
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
+			map<string, int> categories;
+
 		}
 #pragma endregion
-//clears the 
 private: 
 	void clearAddProductFields() {
 	tb_upc->Text = "";
@@ -377,13 +370,13 @@ private:
 	}
 
 public:
-	bool addProductToDB(String^ Name, String^ UPC, String^ Price, String^ quantity) {
+	bool addProductToDB(String^ Name, int category, String^ UPC, String^ Price, String^ quantity) {
 		MySqlConnection^ conDataBase = connectToDB();
 		//int quant = System::Convert::ToInt32(quantity);
 		int quant = 100;
 
 		//MessageBox::Show(Name);
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO products (id,Product_Name, Product_Category,Quantity, UPC) VALUES (NULL,'"+Name+"', 4, '"+quant+"','"+UPC+"')", conDataBase);
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO products (id,Product_Name, Product_Category,Quantity, UPC) VALUES (NULL,'"+Name+"', '"+category+"', '"+quant+"','"+UPC+"')", conDataBase);
 		MySqlDataReader^ myReader;
 
 		try {
@@ -401,6 +394,7 @@ private: System::Void btn_addProduct_Click(System::Object^  sender, System::Even
 	String^ productUPC = tb_upc->Text;
 	String^ productPrice = tb_price->Text;
 	String^ productQuantity = tb_quantity->Text;
+	String^ productCategory = cmb_category->Text;
 
 	if (TestString(Name)) {
 		MessageBox::Show("Name field is Required but was left empty");
@@ -408,32 +402,52 @@ private: System::Void btn_addProduct_Click(System::Object^  sender, System::Even
 	else if (TestString(productUPC)) {
 		MessageBox::Show("UPC field is Required but was left empty");
 	}
+	else if (TestString(productCategory)) {
+		MessageBox::Show("Product Category was not selected");
+	}
 	else {
-		bool result = addProductToDB(Name, productUPC, productPrice, productQuantity);
-
-		if (result) tb_Message->Text = "Product Successfully Added";
+		int cat;
+		try {
+			for (int i = 0; i < categories->Count; i++) {
+				if (Convert::ToString(categories[i]) == Convert::ToString(productCategory)) {
+					cat = i;
+				}
+			}
+			
+		}
+		catch (Exception^ ex) {
+			MessageBox::Show(ex->Message);
+		}
+		bool result = addProductToDB(Name, cat+1, productUPC, productPrice, productQuantity);
+		if (result) {
+			tb_Message->Text = "Product Successfully Added";
+			clearAddProductFields();
+		}
 		else tb_Message->Text = "Problem Adding Product To Inventory";
 	}
 
 }
 private: 
-	System::Void btn_test_Click(System::Object^  sender, System::EventArgs^  e) {
-		cmb_category->Items->Add("Test5");
-	}
 	void addCategories() {
 		MySqlConnection^ DB = connectToDB();//Database Connection
 
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT Product_Category FROM products", DB);
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT * FROM categories", DB);
 		MySqlDataReader^ myReader;
 
 		try {
 			DB->Open();
 			myReader = cmdDataBase->ExecuteReader(); //executes sql command
+			tb_Message->Text = "";
+			cmb_category->Items->Clear();
 			while (myReader->Read())
 			{
-				tb_Message->Text = myReader->GetString(0) + "\r\n";
+				cmb_category->Items->Add(myReader->GetString(1));
+				categories->Add(myReader->GetString(1));
+				categories->TrimToSize();
 			}
-			
+			for (int i = 0; i < categories->Count; i++) {
+				tb_Message->Text += Convert::ToString(i) + categories[i];
+			}
 		}
 		catch (Exception^ ex) {
 			MessageBox::Show(ex->Message);
