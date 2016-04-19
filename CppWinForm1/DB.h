@@ -1,9 +1,13 @@
 #pragma once
+#include "Category.h"
 using namespace System;
 using namespace MySql::Data::MySqlClient;
 using namespace MySql::Data;
 using namespace System::Windows::Forms;
 using namespace System::Collections;
+
+
+
 
 
 public ref class DB {
@@ -51,7 +55,6 @@ public:
 		}
 		catch (Exception^) {
 			throw;
-			return false;
 		}
 		return true;
 	}
@@ -59,7 +62,8 @@ public:
 	ArrayList^ retrieveCategories() {
 		//temp array to store the categories coming back from the db
 		ArrayList^ categories = gcnew ArrayList;
-
+		// array<Category^>^ categories;
+		//List<Category^> categories;
 		//Database Connection
 		MySqlConnection^ conDataBase = connectToDB();
 		//SQL Command
@@ -69,13 +73,29 @@ public:
 			conDataBase->Open();
 			reader = cmdDataBase->ExecuteReader();//Executes SQL Statement
 			while (reader->Read()) {
-				categories->Add(reader->GetString(1));
+				Category^ category = gcnew Category(reader->GetString(1), reader->GetInt32(0));
+				categories->Add(category);
 			}
 		}
 		catch (Exception^) {
 			throw;
 		}
-		return categories;
+		return categories;//returns the arraylist containing the categories
+	}
+	bool deleteProduct(String^ name) {
+		MySqlConnection^ conDataBase = connectToDB();
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("DELETE FROM products WHERE Product_Name='" + name + "'", conDataBase);
+		MySqlDataReader^ reader;
+
+		try {
+			conDataBase->Open();
+			cmdDataBase->ExecuteReader();
+			return true;//if product was successfully removed return true notify success of removal
+		}
+		catch (Exception^) {
+			throw;
+		}
+		return false;
 	}
 
 };
