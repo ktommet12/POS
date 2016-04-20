@@ -14,32 +14,72 @@ public ref class DB {
 private:
 	//Database Connection String
 	String^ constring = L"server=108.163.238.185;user id=sdosburn_Group1;password=uat1234; database=sdosburn_inventoryfood;persistsecurityinfo=True";
-	
+	ArrayList^ categories = gcnew ArrayList;
 
 	//Database Connection
 	MySqlConnection^ connectToDB() {
-		String^ constring = L"server=108.163.238.185;user id=sdosburn_Group1;password=uat1234; database=sdosburn_inventoryfood;persistsecurityinfo=True";
 		MySqlConnection^ conDataBase = gcnew MySqlConnection(constring);
 		return conDataBase;
 	}
-public:
-	bool addProductToDB(String^ Name, int category, String^ UPC, String^ Price, String^ quantity) {
+	void retrieveCategories() {
+		//temp array to store the categories coming back from the db
+		ArrayList^ DBcategories = gcnew ArrayList;
+
+		//Database Connection
 		MySqlConnection^ conDataBase = connectToDB();
+		//SQL Command
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("Select * FROM categories", conDataBase);
+		MySqlDataReader^ reader;
+		try {
+			conDataBase->Open();
+			reader = cmdDataBase->ExecuteReader();//Executes SQL Statement
+			while (reader->Read()) {
+				//Category^ category = gcnew Category(reader->GetString(1), reader->GetInt32(0));
+				String^ categoryName = reader->GetString(1);
+				DBcategories->Add(categoryName);
+			}
+			categories = DBcategories;
+		}
+		catch (Exception^) {
+			throw;
+		}
+	}
+public:
+	//standard function that adds a product to the database without a sale price
+	bool addProductToDB(String^ Name, int category, String^ UPC, String^ quantity) {
+		//Database Connection
+		MySqlConnection^ conDataBase = connectToDB();
+
 		//converting text representation of quantity to int for database insertion
 		int quant = Convert::ToInt32(quantity);
 
 		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO products (id,Product_Name, Product_Category,Quantity, UPC) VALUES (NULL,'" + Name + "', '" + category + "', '" + quant + "','" + UPC + "')", conDataBase);
-		MySqlDataReader^ myReader;
 
 		try {
 			conDataBase->Open();
-			myReader = cmdDataBase->ExecuteReader(); //executes sql command
+			cmdDataBase->ExecuteReader(); //executes sql command
 		}
 		catch (Exception^) {
 			throw;
 			return false;
 		}
 		return true;
+	}
+	bool addProductToDB(String^ Name, int category, String^ UPC, String^ quantity, String^ Price) {
+		MySqlConnection^ conDataBase = connectToDB();//Database Connection
+
+		//SQL Statement
+		MySqlCommand^ SQL = gcnew MySqlCommand("INSERT INTO products (id, Product_Name, Product_Category, Quantity, Price, UPC) VALUES (NULL,'" + Name + "', '" + category + "', '" + quantity + "','" + Price + "','" + UPC + "')", conDataBase);
+		try {
+			conDataBase->Open();
+			SQL->ExecuteReader();//Executes SQL Statement
+		}
+		catch (Exception^)
+		{
+			throw;//throws exception back to calling function
+			return false;
+		}
+		return true;//if no errors ocurred that means product was successfully added and return true.
 	}
 	bool logUserIn(String^ username, String^ password) {
 		MySqlConnection^ conDataBase = connectToDB();
@@ -58,30 +98,17 @@ public:
 		}
 		return true;
 	}
-	//returns the array list that stores the categories loaded from the database.
-	ArrayList^ retrieveCategories() {
-		//temp array to store the categories coming back from the db
-		ArrayList^ categories = gcnew ArrayList;
-		// array<Category^>^ categories;
-		//List<Category^> categories;
-		//Database Connection
-		MySqlConnection^ conDataBase = connectToDB();
-		//SQL Command
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("Select * FROM categories", conDataBase);
-		MySqlDataReader^ reader;
-		try {
-			conDataBase->Open();
-			reader = cmdDataBase->ExecuteReader();//Executes SQL Statement
-			while (reader->Read()) {
-				Category^ category = gcnew Category(reader->GetString(1), reader->GetInt32(0));
-				categories->Add(category);
-			}
+	ArrayList^ getCategories() {
+		//if this is the first time the categories are requested, retrieve categories and return the categories Array
+		if (categories->Count == 0) {
+			retrieveCategories();
+			return categories;
 		}
-		catch (Exception^) {
-			throw;
-		}
-		return categories;//returns the arraylist containing the categories
+		//otherwise just return the categories Array
+		else return categories;
 	}
+	//returns the array list that stores the categories loaded from the database.
+	//deletes product from database by Name
 	bool deleteProduct(String^ name) {
 		MySqlConnection^ conDataBase = connectToDB();
 		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("DELETE FROM products WHERE Product_Name='" + name + "'", conDataBase);
@@ -89,13 +116,15 @@ public:
 
 		try {
 			conDataBase->Open();
-			cmdDataBase->ExecuteReader();
-			return true;//if product was successfully removed return true notify success of removal
+			reader = cmdDataBase->ExecuteReader();
+			//return true;//if product was successfully removed return true notify success of removal
+			if (reader->RecordsAffected == 1)
+				return true;
+			else return false;
 		}
 		catch (Exception^) {
 			throw;
+			return false;
 		}
-		return false;
 	}
-
 };
