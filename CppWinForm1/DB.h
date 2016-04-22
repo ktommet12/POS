@@ -1,14 +1,9 @@
 #pragma once
-#include "Category.h"
 using namespace System;
 using namespace MySql::Data::MySqlClient;
 using namespace MySql::Data;
 using namespace System::Windows::Forms;
 using namespace System::Collections;
-
-
-
-
 
 public ref class DB {
 private:
@@ -34,7 +29,6 @@ private:
 			conDataBase->Open();
 			reader = cmdDataBase->ExecuteReader();//Executes SQL Statement
 			while (reader->Read()) {
-				//Category^ category = gcnew Category(reader->GetString(1), reader->GetInt32(0));
 				String^ categoryName = reader->GetString(1);
 				DBcategories->Add(categoryName);
 			}
@@ -96,7 +90,7 @@ public:
 		catch (Exception^) {
 			throw;
 		}
-		return true;
+		return false;
 	}
 	ArrayList^ getCategories() {
 		//if this is the first time the categories are requested, retrieve categories and return the categories Array
@@ -126,5 +120,9 @@ public:
 			throw;
 			return false;
 		}
+	}
+	bool createNewUser(String^ username, String^ password) {
+		MySqlConnection^ conDataBase = connectToDB();
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO user_login (id, )", conDataBase);
 	}
 };
