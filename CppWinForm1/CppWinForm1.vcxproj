@@ -138,17 +138,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddProduct.cpp" />
     <ClCompile Include="MyForm.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AddProduct.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="Category.h" />
+    <ClInclude Include="DB.h" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Security.h" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AddProduct.resx">
+      <DependentUpon>AddProduct.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MyForm.resx">
       <DependentUpon>MyForm.h</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CppWinForm1.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\Users\Kyle Tommet\Downloads\PosIcon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

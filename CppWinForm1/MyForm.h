@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
-#include <array>
-#include <map>
+#include "DB.h"
+#include "AddProduct.h"
+#include "Security.h"
 
 namespace CppWinForm1 {
 
@@ -13,7 +14,6 @@ namespace CppWinForm1 {
 	using namespace System::Drawing;
 	using namespace MySql::Data::MySqlClient;
 	using namespace MySql::Data;
-	using namespace std;
 
 	/// <summary>
 	/// Summary for MyForm
@@ -24,11 +24,6 @@ namespace CppWinForm1 {
 		MyForm(void)
 		{
 			InitializeComponent();
-			
-			addCategories();
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
 	protected:
@@ -42,7 +37,7 @@ namespace CppWinForm1 {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::Button^  btn_ok;
+
 	private: System::Windows::Forms::TextBox^  tb_Message;
 	private: System::Windows::Forms::TextBox^  tb_username;
 	private: System::Windows::Forms::TextBox^  tb_password;
@@ -65,8 +60,22 @@ namespace CppWinForm1 {
 	private: System::Windows::Forms::Button^  btn_clearFields;
 	private: System::Windows::Forms::ComboBox^  cmb_category;
 	private: System::Windows::Forms::Label^  label5;
+	private: System::Windows::Forms::TextBox^  tb_deleteName;
+	private: System::Windows::Forms::Button^  cmd_delete;
 
-	private: ArrayList^ categories = gcnew ArrayList;
+	
+	//Non Auto Generated Variables
+	private:
+			 ArrayList^ categories = gcnew ArrayList;
+			 DB^ db = gcnew DB;
+	private: System::Windows::Forms::TextBox^  tb_newUsername;
+	private: System::Windows::Forms::TextBox^  tb_newPassword;
+
+
+
+	private: System::Windows::Forms::Button^  button2;
+	private: System::Windows::Forms::Label^  label6;
+	private: System::Windows::Forms::Label^  label7;
 
 
 
@@ -86,7 +95,7 @@ namespace CppWinForm1 {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->btn_ok = (gcnew System::Windows::Forms::Button());
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MyForm::typeid));
 			this->tb_Message = (gcnew System::Windows::Forms::TextBox());
 			this->tb_username = (gcnew System::Windows::Forms::TextBox());
 			this->tb_password = (gcnew System::Windows::Forms::TextBox());
@@ -104,17 +113,14 @@ namespace CppWinForm1 {
 			this->btn_clearFields = (gcnew System::Windows::Forms::Button());
 			this->cmb_category = (gcnew System::Windows::Forms::ComboBox());
 			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->tb_deleteName = (gcnew System::Windows::Forms::TextBox());
+			this->cmd_delete = (gcnew System::Windows::Forms::Button());
+			this->tb_newUsername = (gcnew System::Windows::Forms::TextBox());
+			this->tb_newPassword = (gcnew System::Windows::Forms::TextBox());
+			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
-			// 
-			// btn_ok
-			// 
-			this->btn_ok->Location = System::Drawing::Point(387, 187);
-			this->btn_ok->Name = L"btn_ok";
-			this->btn_ok->Size = System::Drawing::Size(167, 23);
-			this->btn_ok->TabIndex = 0;
-			this->btn_ok->Text = L"Ok";
-			this->btn_ok->UseVisualStyleBackColor = true;
-			this->btn_ok->Click += gcnew System::EventHandler(this, &MyForm::btn_ok_Click);
 			// 
 			// tb_Message
 			// 
@@ -140,7 +146,7 @@ namespace CppWinForm1 {
 			// 
 			// btn_login
 			// 
-			this->btn_login->Location = System::Drawing::Point(39, 66);
+			this->btn_login->Location = System::Drawing::Point(30, 65);
 			this->btn_login->Name = L"btn_login";
 			this->btn_login->Size = System::Drawing::Size(75, 23);
 			this->btn_login->TabIndex = 4;
@@ -226,11 +232,11 @@ namespace CppWinForm1 {
 			// 
 			// btn_addProduct
 			// 
-			this->btn_addProduct->Location = System::Drawing::Point(55, 407);
+			this->btn_addProduct->Location = System::Drawing::Point(105, 180);
 			this->btn_addProduct->Name = L"btn_addProduct";
-			this->btn_addProduct->Size = System::Drawing::Size(75, 23);
+			this->btn_addProduct->Size = System::Drawing::Size(109, 23);
 			this->btn_addProduct->TabIndex = 14;
-			this->btn_addProduct->Text = L"Add Product";
+			this->btn_addProduct->Text = L"Add New Product";
 			this->btn_addProduct->UseVisualStyleBackColor = true;
 			this->btn_addProduct->Click += gcnew System::EventHandler(this, &MyForm::btn_addProduct_Click);
 			// 
@@ -242,7 +248,6 @@ namespace CppWinForm1 {
 			this->btn_clearFields->TabIndex = 15;
 			this->btn_clearFields->Text = L"Clear Fields";
 			this->btn_clearFields->UseVisualStyleBackColor = true;
-			this->btn_clearFields->Click += gcnew System::EventHandler(this, &MyForm::btn_clearFields_Click);
 			// 
 			// cmb_category
 			// 
@@ -263,11 +268,77 @@ namespace CppWinForm1 {
 			this->label5->TabIndex = 17;
 			this->label5->Text = L"Category";
 			// 
+			// tb_deleteName
+			// 
+			this->tb_deleteName->Location = System::Drawing::Point(435, 203);
+			this->tb_deleteName->Name = L"tb_deleteName";
+			this->tb_deleteName->Size = System::Drawing::Size(121, 20);
+			this->tb_deleteName->TabIndex = 18;
+			// 
+			// cmd_delete
+			// 
+			this->cmd_delete->Location = System::Drawing::Point(422, 229);
+			this->cmd_delete->Name = L"cmd_delete";
+			this->cmd_delete->Size = System::Drawing::Size(134, 23);
+			this->cmd_delete->TabIndex = 19;
+			this->cmd_delete->Text = L"Delete Product";
+			this->cmd_delete->UseVisualStyleBackColor = true;
+			this->cmd_delete->Click += gcnew System::EventHandler(this, &MyForm::cmd_delete_Click);
+			// 
+			// tb_newUsername
+			// 
+			this->tb_newUsername->Location = System::Drawing::Point(470, 514);
+			this->tb_newUsername->Name = L"tb_newUsername";
+			this->tb_newUsername->Size = System::Drawing::Size(121, 20);
+			this->tb_newUsername->TabIndex = 20;
+			// 
+			// tb_newPassword
+			// 
+			this->tb_newPassword->Location = System::Drawing::Point(470, 540);
+			this->tb_newPassword->Name = L"tb_newPassword";
+			this->tb_newPassword->Size = System::Drawing::Size(121, 20);
+			this->tb_newPassword->TabIndex = 21;
+			// 
+			// button2
+			// 
+			this->button2->Location = System::Drawing::Point(457, 566);
+			this->button2->Name = L"button2";
+			this->button2->Size = System::Drawing::Size(134, 23);
+			this->button2->TabIndex = 22;
+			this->button2->Text = L"Create New User";
+			this->button2->UseVisualStyleBackColor = true;
+			this->button2->Click += gcnew System::EventHandler(this, &MyForm::button2_Click);
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(389, 517);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(58, 13);
+			this->label6->TabIndex = 23;
+			this->label6->Text = L"Username:";
+			// 
+			// label7
+			// 
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(389, 542);
+			this->label7->Name = L"label7";
+			this->label7->Size = System::Drawing::Size(56, 13);
+			this->label7->TabIndex = 24;
+			this->label7->Text = L"Password:";
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(603, 593);
+			this->Controls->Add(this->label7);
+			this->Controls->Add(this->label6);
+			this->Controls->Add(this->button2);
+			this->Controls->Add(this->tb_newPassword);
+			this->Controls->Add(this->tb_newUsername);
+			this->Controls->Add(this->cmd_delete);
+			this->Controls->Add(this->tb_deleteName);
 			this->Controls->Add(this->label5);
 			this->Controls->Add(this->cmb_category);
 			this->Controls->Add(this->btn_clearFields);
@@ -285,174 +356,67 @@ namespace CppWinForm1 {
 			this->Controls->Add(this->tb_password);
 			this->Controls->Add(this->tb_username);
 			this->Controls->Add(this->tb_Message);
-			this->Controls->Add(this->btn_ok);
+			this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"$this.Icon")));
 			this->Name = L"MyForm";
-			this->Text = L"MyForm";
+			this->Text = L"POS";
 			this->ResumeLayout(false);
 			this->PerformLayout();
-
-			map<string, int> categories;
 
 		}
 #pragma endregion
 private: 
-	void clearAddProductFields() {
-	tb_upc->Text = "";
-	tb_name->Text = "";
-	tb_price->Text = "";
-	tb_upc->Text = "";
-	tb_quantity->Text = "";
-	}
 	bool TestString(String^ str) {
+		//if the string is empty or contains nothing but whitespace will return true
 		if (String::IsNullOrWhiteSpace(str)) return true;
 		else return false;
 	}
 
-private: MySqlConnection^ connectToDB() {
-	String^ constring = L"server=108.163.238.185;user id=sdosburn_Group1;password=uat1234; database=sdosburn_inventoryfood;persistsecurityinfo=True";
-	MySqlConnection^ conDataBase = gcnew MySqlConnection(constring);
-	return conDataBase;
+private:
+	System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+		tb_upc->Text = "62398163986365";//temp barcode used for testing 
+	}
+
+private: System::Void btn_addProduct_Click(System::Object^  sender, System::EventArgs^  e) {
+	AddProduct^ add = gcnew AddProduct;
+	add->ShowDialog();
 }
 private: 
-	System::Void btn_ok_Click(System::Object^  sender, System::EventArgs^  e) {
-		
-	String^ constring = L"server=108.163.238.185;user id=sdosburn_Group1;password=uat1234; database=sdosburn_inventoryfood;persistsecurityinfo=True";
-	MySqlConnection^ conDataBase = gcnew MySqlConnection(constring);
-	MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT * FROM products", conDataBase);
-	MySqlDataReader^ myReader;
-	try {
-		conDataBase->Open();
-		myReader = cmdDataBase->ExecuteReader(); //Add the SQL Query
-		while(myReader->Read()){
-			tb_Message->Text += "\r\n";
-			tb_Message->Text += ("ID: " + myReader->GetInt32(0) + "\r\n");
-			tb_Message->Text += "Product Name: " + myReader->GetString(1) + "\r\n";
-		}
-	}
-	catch (Exception^ex)
-	{
-		MessageBox::Show(ex->Message);
-	}
-
-
-}
 	System::Void btn_login_Click(System::Object^  sender, System::EventArgs^  e) {
 		String^ username = tb_username->Text;
 		String^ password = tb_password->Text;
-		MySqlConnection^ conDataBase = connectToDB();
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT * FROM user_login WHERE username=username", conDataBase);
-		MySqlDataReader^ myReader;
-
-		try {
-			conDataBase->Open();
-			myReader = cmdDataBase->ExecuteReader(); //Add the SQL Query
-			bool isLoggedIn = false;
-			
-			while (myReader->Read()) {
-				if (password == myReader->GetString(2)) {
-					tb_Message->Text = "You have been successfully logged in.";
-					isLoggedIn = true;
-				}
-			}
-			if (!isLoggedIn) tb_Message->Text = "Incorrect Password";
-
+		bool result = db->logUserIn(username, password);
+		if (result) {
+			MessageBox::Show("You have been successfully logged in");
+			tb_username->Text = "";
+			tb_password->Text = "";
 		}
-		catch (Exception^ ex) {
-			MessageBox::Show(ex->Message);
+		else MessageBox::Show("Incorrect Username/Password");
+}
+private: System::Void cmd_delete_Click(System::Object^  sender, System::EventArgs^  e) {
+	String^ name = tb_deleteName->Text;
+	try {
+		bool result = db->deleteProduct(name);
+		if (result) {
+			MessageBox::Show("Product Removed Successfully");
 		}
-	}
-	System::Void btn_clearFields_Click(System::Object^  sender, System::EventArgs^  e) {
-		clearAddProductFields();
-	}
+		else
+			MessageBox::Show("Item not found in Database");
 
-	System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-		tb_upc->Text = "62398163986365";
 	}
-
-public:
-	bool addProductToDB(String^ Name, int category, String^ UPC, String^ Price, String^ quantity) {
-		MySqlConnection^ conDataBase = connectToDB();
-		//int quant = System::Convert::ToInt32(quantity);
-		int quant = 100;
-
-		//MessageBox::Show(Name);
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO products (id,Product_Name, Product_Category,Quantity, UPC) VALUES (NULL,'"+Name+"', '"+category+"', '"+quant+"','"+UPC+"')", conDataBase);
-		MySqlDataReader^ myReader;
-
-		try {
-			conDataBase->Open();
-			myReader = cmdDataBase->ExecuteReader(); //executes sql command
-		}
-		catch (Exception^ ex) {
-			MessageBox::Show(ex->Message, "Database Error", MessageBoxButtons::OK);
-			return false;
-		}
-		return true;
+	catch (Exception^ ex) {
+		MessageBox::Show(ex->Message);
 	}
-private: System::Void btn_addProduct_Click(System::Object^  sender, System::EventArgs^  e) {
-	String^ Name = tb_name->Text;
-	String^ productUPC = tb_upc->Text;
-	String^ productPrice = tb_price->Text;
-	String^ productQuantity = tb_quantity->Text;
-	String^ productCategory = cmb_category->Text;
-
-	if (TestString(Name)) {
-		MessageBox::Show("Name field is Required but was left empty");
-	}
-	else if (TestString(productUPC)) {
-		MessageBox::Show("UPC field is Required but was left empty");
-	}
-	else if (TestString(productCategory)) {
-		MessageBox::Show("Product Category was not selected");
+}
+private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
+	String^ username = tb_newUsername->Text;
+	String^ password = tb_newPassword->Text;
+	if (TestString(username) || TestString(password)) {
+		MessageBox::Show("Username/Password was required but not provided");
 	}
 	else {
-		int cat;
-		try {
-			for (int i = 0; i < categories->Count; i++) {
-				if (Convert::ToString(categories[i]) == Convert::ToString(productCategory)) {
-					cat = i;
-				}
-			}
-			
-		}
-		catch (Exception^ ex) {
-			MessageBox::Show(ex->Message);
-		}
-		bool result = addProductToDB(Name, cat+1, productUPC, productPrice, productQuantity);
-		if (result) {
-			tb_Message->Text = "Product Successfully Added";
-			clearAddProductFields();
-		}
-		else tb_Message->Text = "Problem Adding Product To Inventory";
+		db->createNewUser(username, password);
 	}
 
 }
-private: 
-	void addCategories() {
-		MySqlConnection^ DB = connectToDB();//Database Connection
-
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("SELECT * FROM categories", DB);
-		MySqlDataReader^ myReader;
-
-		try {
-			DB->Open();
-			myReader = cmdDataBase->ExecuteReader(); //executes sql command
-			tb_Message->Text = "";
-			cmb_category->Items->Clear();
-			while (myReader->Read())
-			{
-				cmb_category->Items->Add(myReader->GetString(1));
-				categories->Add(myReader->GetString(1));
-				categories->TrimToSize();
-			}
-			for (int i = 0; i < categories->Count; i++) {
-				tb_Message->Text += Convert::ToString(i) + categories[i];
-			}
-		}
-		catch (Exception^ ex) {
-			MessageBox::Show(ex->Message);
-		}
-
-	}
 };
 }

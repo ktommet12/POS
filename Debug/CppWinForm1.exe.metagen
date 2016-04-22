@@ -1,3 +1,4 @@
+  CppWinForm1.AddProduct.resources - Embedded, ContainedInManifestFile, 
   CppWinForm1.MyForm.resources - Embedded, ContainedInManifestFile, 
 ImageRuntimeVersion: v4.0.30319
 Assembly CppWinForm1, Version=0.0.*, Culture=Invariant Language (Invariant Country): 
@@ -16,8 +17,35 @@ Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=
 	hash=None, flags=None
 Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
-Class CppWinForm1.MyForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+Class Category: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(System.Object): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(System.String, Int32): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.String Name : Public
+    Int32 ID : Public
+  Methods:
+    getName(): PrivateScope, Public, HideBySig
+    getID(): PrivateScope, Public, HideBySig
+Class Service: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    EncryptText(UTF8Encoding, String): PrivateScope, Public, HideBySig
+    DecryptText(UTF8Encoding, Byte[]): PrivateScope, Public, HideBySig
+Class DB: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    addProductToDB(String, Int32, String, String, String): PrivateScope, Public, HideBySig
+    addProductToDB(String, Int32, String, String): PrivateScope, Public, HideBySig
+    logUserIn(String, String): PrivateScope, Public, HideBySig
+    getCategories(): PrivateScope, Public, HideBySig
+    deleteProduct(String): PrivateScope, Public, HideBySig
+    createNewUser(String, String): PrivateScope, Public, HideBySig
+Class CppWinForm1.AddProduct: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Methods:
-    addProductToDB(String, String, String, String): PrivateScope, Public, HideBySig
+    TestString(String): PrivateScope, Public, HideBySig
+Class CppWinForm1.MyForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
