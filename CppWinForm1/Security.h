@@ -11,7 +11,7 @@ public ref class Service
 
 private: 
 	String^ securityKey = "Fqw4$@gwertgHRTEWs";
-	array<Category^>^ cat;
+
 
 
 	/// This will convert text to Encrypted Text format.

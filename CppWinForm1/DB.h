@@ -1,4 +1,5 @@
 #pragma once
+#include "Security.h"
 using namespace System;
 using namespace MySql::Data::MySqlClient;
 using namespace MySql::Data;
@@ -9,7 +10,10 @@ public ref class DB {
 private:
 	//Database Connection String
 	String^ constring = L"server=108.163.238.185;user id=sdosburn_Group1;password=uat1234; database=sdosburn_inventoryfood;persistsecurityinfo=True";
-	ArrayList^ categories = gcnew ArrayList;
+	
+	ArrayList^ categories = gcnew ArrayList;	//categories array
+	UTF8Encoding^ utf8 = gcnew UTF8Encoding;	//security encoding
+	Service^ security = gcnew Service;			//security class variable
 
 	//Database Connection
 	MySqlConnection^ connectToDB() {
@@ -77,14 +81,21 @@ public:
 	}
 	bool logUserIn(String^ username, String^ password) {
 		MySqlConnection^ conDataBase = connectToDB();
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("Select * FROM user_login WHERE username=username", conDataBase);
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("Select * FROM user_login WHERE username='" + username + "'", conDataBase);
 		MySqlDataReader^ reader;
 
 		try {
 			conDataBase->Open();
 			reader = cmdDataBase->ExecuteReader();
+
 			while (reader->Read()) {
-				if (username == reader->GetString(2)) return true;
+				//password retrieved from the database
+				String^ encPassword = reader->GetString(2);
+				//password provided by the user
+				String^ userPass = toString(security->EncryptText(utf8, password));
+				//compare returned string to password provided by user
+				if (userPass == encPassword) return true;
+				else return false;
 			}
 		}
 		catch (Exception^) {
@@ -111,7 +122,6 @@ public:
 		try {
 			conDataBase->Open();
 			reader = cmdDataBase->ExecuteReader();
-			//return true;//if product was successfully removed return true notify success of removal
 			if (reader->RecordsAffected == 1)
 				return true;
 			else return false;
@@ -123,6 +133,30 @@ public:
 	}
 	bool createNewUser(String^ username, String^ password) {
 		MySqlConnection^ conDataBase = connectToDB();
-		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO user_login (id, )", conDataBase);
+		
+		//array<Byte>^ test = security->EncryptText(utf8, password);
+		String^ encPassword = toString(security->EncryptText(utf8, password));
+		MySqlCommand^ cmdDataBase = gcnew MySqlCommand("INSERT INTO user_login (id, username, password) VALUES (NULL, '" + username + "', '" + encPassword + "')" , conDataBase);
+		MySqlDataReader^ reader;
+
+		try {
+			conDataBase->Open();
+			reader = cmdDataBase->ExecuteReader();
+			if (reader->RecordsAffected == 1) return true;
+			else return false;
+		}
+		catch (Exception^) {
+			throw;
+		}
 	}
+	private:
+		//converts the password byte array to a string for either db insertion or user login
+		String^ toString(array<Byte>^ arr) {
+			//String^ teest1 = gcnew String(byte);
+			String^ test;
+			for (int i = 0; i < arr->Length; i++) {
+				test += arr[i] + " ";
+			}
+			return test;
+		}
 };
